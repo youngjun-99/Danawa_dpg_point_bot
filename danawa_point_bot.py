@@ -63,22 +63,26 @@ for i in range(100, 104):
     links = content.find_all('a', attrs={'class': 'thumb_link'})[3:]
     data_dicts += [make_dict(link.get('href')) for link in links]
 
-for data_dict in tqdm(data_dicts, desc='뉴스 댓글 달기'):
-    s.post('https://dpg.danawa.com/news/rest/news/setComment', data=data_dict)
+for data_dict in tqdm(data_dicts[:100], desc='뉴스 댓글 달기'):
+    resp = s.post('https://dpg.danawa.com/news/rest/news/setComment', data=data_dict)
+    if resp.status_code != 200:
+        print(data_dict)
+        break
+    
     sleep(3)
 
 data_dicts = []
 
 
 # 이미지
-document = s.get(BBS_NAV_URL % (GALLERY_20, 30),
+document = s.get(BBS_NAV_URL % (GALLERY_20, 3),
                  params={'user-agent': USER_AGENT}).text
 content = BeautifulSoup(document, "html.parser")
-links = content.find_all('a', attrs={'class': 'gall_thumb_link thumb_area'})
+links = content.find_all('a', attrs={'class': 'gall_thumb_link thumb_area'})[3:]
 data_dicts += [make_dict(link.get('href')) for link in links]
 
 for i in GALLERY_5:
-    document = s.get(BBS_NAV_URL % (i, 30), params={
+    document = s.get(BBS_NAV_URL % (i, 3), params={
                      'user-agent': USER_AGENT}).text
     content = BeautifulSoup(document, "html.parser")
     links = content.find_all(
@@ -87,7 +91,7 @@ for i in GALLERY_5:
 
 # BBS
 for i in BBS_20:
-    document = s.get(BBS_NAV_URL % (i, 30), params={
+    document = s.get(BBS_NAV_URL % (i, 5), params={
                      'user-agent': USER_AGENT}).text
     content = BeautifulSoup(document, "html.parser")
     links = content.find_all('a', attrs={'class': 'title_link'})[3:23]
@@ -95,12 +99,15 @@ for i in BBS_20:
         links = content.find_all('a', attrs={'class': 'thumb_link'})[3:23]
     data_dicts += [make_dict(link.get('href')) for link in links]
 for i in BBS_5:
-    document = s.get(BBS_NAV_URL % (i, 10), params={
+    document = s.get(BBS_NAV_URL % (i, 5), params={
                      'user-agent': USER_AGENT}).text
     content = BeautifulSoup(document, "html.parser")
     links = content.find_all('a', attrs={'class': 'title_link'})[3:8]
     data_dicts += [make_dict(link.get('href')) for link in links]
 
 for data_dict in tqdm(data_dicts, desc='게시글 댓글 달기'):
-    s.post('https://dpg.danawa.com/news/rest/news/setComment', data=data_dict)
+    resp = s.post('https://dpg.danawa.com/bbs/rest/setComment', data=data_dict)
+    if resp.status_code != 200:
+        print(data_dict)
+        break
     sleep(3)
